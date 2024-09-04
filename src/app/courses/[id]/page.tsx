@@ -78,7 +78,21 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
               {surveyQuizContent.options?.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2 mb-2">
                   <RadioGroupItem value={option} id={`option-${index}`} />
-                  <Label htmlFor={`option-${index}`}>{option}</Label>
+                  <Input
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...surveyQuizContent.options];
+                      newOptions[index] = e.target.value;
+                      onEdit({ ...surveyQuizContent, options: newOptions });
+                    }}
+                    className="ml-2"
+                  />
+                  <Button onClick={() => {
+                    const newOptions = surveyQuizContent.options.filter((_, i) => i !== index);
+                    onEdit({ ...surveyQuizContent, options: newOptions });
+                  }}>
+                    Remove
+                  </Button>
                 </div>
               ))}
             </RadioGroup>
@@ -159,6 +173,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const { id } = params;
   const getCourse = useCourseStore((state) => state.getCourse);
   const addTile = useCourseStore((state) => state.addTile);
+  const updateTile = useCourseStore((state) => state.updateTile);
   const [course, setCourse] = useState<Course | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -186,12 +201,12 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
 
   const handleEditTile = (index: number, newContent: TileContent) => {
     if (course) {
-      const newTiles = [...course.tiles];
-      newTiles[index] = { ...newTiles[index], content: newContent };
-      const updatedCourse = { ...course, tiles: newTiles };
-      setCourse(updatedCourse);
-      // Note: You might need to add an updateCourse function to your courseStore
-      // updateCourse(updatedCourse);
+      const tileId = course.tiles[index].id;
+      updateTile(course.id, tileId, newContent);
+      const updatedCourse = getCourse(id);
+      if (updatedCourse) {
+        setCourse(updatedCourse);
+      }
     }
   };
 

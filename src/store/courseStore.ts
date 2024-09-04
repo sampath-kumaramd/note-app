@@ -18,6 +18,7 @@ interface CourseStore {
   addCourse: (name: string) => string;
   getCourse: (id: string) => Course | undefined;
   addTile: (courseId: string, tileType: Tile['type']) => void;
+  updateTile: (courseId: string, tileId: string, newContent: any) => void;
 }
 
 export const useCourseStore = create<CourseStore>()(
@@ -50,10 +51,25 @@ export const useCourseStore = create<CourseStore>()(
           }),
         }));
       },
+      updateTile: (courseId: string, tileId: string, newContent: any) => {
+        set((state) => ({
+          courses: state.courses.map((course) => {
+            if (course.id === courseId) {
+              return {
+                ...course,
+                tiles: course.tiles.map((tile) =>
+                  tile.id === tileId ? { ...tile, content: newContent } : tile
+                ),
+              };
+            }
+            return course;
+          }),
+        }));
+      },
     }),
     {
-      name: 'course-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // use the imported createJSONStorage
+      name: 'course-storage',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
