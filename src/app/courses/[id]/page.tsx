@@ -12,7 +12,6 @@ import { CARD_TYPES, CardType, Course, TileContent } from '@/types/types';
 interface CourseCreatePageProps {
   params: { id: string };
 }
-
 export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const router = useRouter();
   const { id } = params;
@@ -20,18 +19,42 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const addTile = useCourseStore((state) => state.addTile);
   const updateTile = useCourseStore((state) => state.updateTile);
   const [course, setCourse] = useState<Course | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCourse = () => {
-      const fetchedCourse = getCourse(id);
-      setCourse(fetchedCourse || { id, name: 'New Course', tiles: [{ id: '1', type: CARD_TYPES.TEXT, content: { title: '' } }] });
+      let fetchedCourse = getCourse(id);
+      if (!fetchedCourse) {
+        // If the course doesn't exist, create a new one with an initial TEXT tile
+        fetchedCourse = {
+          id,
+          name: 'New Course',
+          tiles: [{
+            id: '1',
+            type: CARD_TYPES.TEXT,
+            content: { title: 'Welcome to your new course!' }
+          }]
+        };
+        // Here you would typically call a function to save this new course to your store
+        // For example: createCourse(fetchedCourse);
+      } else if (fetchedCourse.tiles.length === 0) {
+        // If the course exists but has no tiles, add an initial TEXT tile
+        const newTile = {
+          id: '1',
+          type: CARD_TYPES.TEXT,
+          content: { title: 'Welcome to your course!' }
+        };
+        fetchedCourse.tiles.push(newTile);
+        // Update the course in the store
+        updateTile(fetchedCourse.id, newTile.id, newTile.content);
+      }
+      setCourse(fetchedCourse);
       setIsLoading(false);
     };
 
     fetchCourse();
-  }, [id, getCourse]);
+  }, [id, getCourse, updateTile]);
 
   const handleAddTile = (type: CardType) => {
     if (course) {
@@ -44,18 +67,18 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
     }
   };
 
-  const handleEditTile = (index: number, newContent: TileContent) => {
-    if (course && course.tiles && index >= 0 && index < course.tiles.length) {
-      const tileId = course.tiles[index].id;
-      updateTile(course.id, tileId, newContent);
-      const updatedCourse = getCourse(id);
-      if (updatedCourse) {
-        setCourse(updatedCourse);
-      }
-    } else {
-      console.error(`Unable to edit tile at index ${index}. Course or tile not found.`);
+ const handleEditTile = (index: number, newContent: TileContent) => {
+  if (course && course.tiles && index >= 0 && index < course.tiles.length) {
+    const tileId = course.tiles[index].id;
+    updateTile(course.id, tileId, newContent);
+    const updatedCourse = getCourse(id);
+    if (updatedCourse) {
+      setCourse(updatedCourse);
     }
-  };
+  } else {
+    console.error(`Unable to edit tile at index ${index}. Course or tile not found.`);
+  }
+};
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, (course?.tiles.length ?? 1) - 1));

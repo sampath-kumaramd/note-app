@@ -22,13 +22,14 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, isInitial
   const renderContent = () => {
     switch (tile.type) {
       case CARD_TYPES.TEXT:
+        const textContent = tile.content as TextTileContent;
         return (
           <CardContent>
             <Input 
               placeholder="Enter Title" 
-              value={(tile.content as TextTileContent).title || ''} 
-              onChange={(e) => onEdit({ ...tile.content, title: e.target.value })}
-              className="mb-4 text-black"
+              value={textContent.title || ''} 
+              onChange={(e) => onEdit({ ...textContent, title: e.target.value })}
+              className={`mb-4 text-black`}
             />
           </CardContent>
         );

@@ -30,17 +30,25 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
 }) => {
   const visibleTiles = tiles.slice(Math.max(0, currentIndex - 1), Math.min(tiles.length, currentIndex + 2));
 
+  const handleEdit = (tileIndex: number, newContent: TileContent) => {
+    console.log('Editing tile at index:', tileIndex, 'New content:', newContent);
+    onEdit(tileIndex, newContent);
+  };
+
   return (
     <div className="relative w-full max-w-[calc(3*16rem+2rem)] mx-auto">
       <div className="flex space-x-4 overflow-x-auto p-4">
-        {visibleTiles.map((tile, index) => (
-          <CourseTileCard
-            key={tile.id}
-            tile={tile}
-            onEdit={(newContent) => onEdit(currentIndex + index - 1, newContent)}
-            isInitial={index === 0 && currentIndex === 0}
-          />
-        ))}
+        {visibleTiles.map((tile, index) => {
+          const actualIndex = currentIndex - 1 + index;
+          return (
+            <CourseTileCard
+              key={tile.id}
+              tile={tile}
+              onEdit={(newContent) => handleEdit(actualIndex, newContent)}
+              isInitial={actualIndex === 0}
+            />
+          );
+        })}
         {tiles.length < 3 && <AddCardDialog onAddCard={onAddCard} />}
       </div>
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-4 mt-4">
