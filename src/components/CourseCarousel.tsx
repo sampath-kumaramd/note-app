@@ -9,8 +9,6 @@ import { CardType, TileContent } from '@/types/types';
 import AddCardDialog from './AddCardDialog';
 import CourseTileCard from './CourseTileCard';
 
-
-
 interface CourseCarouselProps {
   tiles: Tile[];
   currentIndex: number;
@@ -28,7 +26,11 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   onNext, 
   onPrevious 
 }) => {
-  const visibleTiles = tiles.slice(Math.max(0, currentIndex - 1), Math.min(tiles.length, currentIndex + 2));
+  const visibleTiles = [
+    tiles[currentIndex],
+    tiles[currentIndex + 1] || null,
+    tiles[currentIndex + 2] || null
+  ];
 
   const handleEdit = (tileIndex: number, newContent: TileContent) => {
     console.log('Editing tile at index:', tileIndex, 'New content:', newContent);
@@ -37,25 +39,29 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
 
   return (
     <div className="relative w-full max-w-[calc(3*16rem+2rem)] mx-auto">
-      <div className="flex space-x-4 overflow-x-auto p-4">
+      <div className="flex items-center space-x-4 overflow-x-auto p-4">
         {visibleTiles.map((tile, index) => {
-          const actualIndex = currentIndex - 1 + index;
-          return (
-            <CourseTileCard
-              key={tile.id}
-              tile={tile}
-              onEdit={(newContent) => handleEdit(actualIndex, newContent)}
-              isInitial={actualIndex === 0}
-            />
-          );
+          const actualIndex = currentIndex + index;
+          if (tile) {
+            return (
+              <CourseTileCard
+                key={tile.id}
+                tile={tile}
+                onEdit={(newContent) => handleEdit(actualIndex, newContent)}
+                isInitial={actualIndex === 0}
+              />
+            );
+          } else {
+            return <div key={`placeholder-${index}`} className="w-full max-w-md aspect-[3/4] border-2 border-dashed border-gray-300 rounded-lg" />;
+          }
         })}
-        {tiles.length < 3 && <AddCardDialog onAddCard={onAddCard} />}
+        <AddCardDialog key="add-card" onAddCard={onAddCard} />
       </div>
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-4 mt-4">
         <Button variant="outline" onClick={onPrevious} disabled={currentIndex === 0}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <Button variant="outline" onClick={onNext} disabled={currentIndex === tiles.length - 1}>
+        <Button variant="outline" onClick={onNext} disabled={currentIndex >= tiles.length - 3}>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

@@ -12,6 +12,7 @@ import { CARD_TYPES, CardType, Course, TileContent } from '@/types/types';
 interface CourseCreatePageProps {
   params: { id: string };
 }
+
 export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const router = useRouter();
   const { id } = params;
@@ -19,7 +20,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const addTile = useCourseStore((state) => state.addTile);
   const updateTile = useCourseStore((state) => state.updateTile);
   const [course, setCourse] = useState<Course | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
 };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, (course?.tiles.length ?? 1) - 1));
+    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, (course?.tiles.length ?? 1) - 3));
   };
 
   const handlePrevious = () => {
