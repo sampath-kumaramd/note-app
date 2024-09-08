@@ -1,27 +1,58 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { DialogContent } from '@radix-ui/react-dialog';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
-import { Tile, useCourseStore } from '@/store/courseStore';
+import { useCourseStore } from '@/store/courseStore';
+
 
 // Define types for different tile contents
-type TextTileContent = { title: string };
-type DetailsTileContent = { title: string; description: string };
-type SurveyQuizTileContent = { question: string; options: string[]; selectedOption: string | null };
-type FormTileContent = { title: string }; // Add more form-specific fields as needed
+const CARD_TYPES = {
+  TEXT: 'text',
+  DETAILS: 'details',
+  SURVEY: 'survey',
+  QUIZ: 'quiz',
+  FORM: 'form',
+} as const;
 
-// Union type for all possible tile contents
+type CardType = typeof CARD_TYPES[keyof typeof CARD_TYPES];
+
+interface TextTileContent {
+  title: string;
+}
+
+interface DetailsTileContent {
+  title: string;
+  description: string;
+}
+
+interface SurveyQuizTileContent {
+  question: string;
+  options: string[];
+  selectedOption: string | null;
+}
+
+interface FormTileContent {
+  title: string;
+}
+
 type TileContent = TextTileContent | DetailsTileContent | SurveyQuizTileContent | FormTileContent;
 
-// Define the structure of a course
+interface Tile {
+  id: string;
+  type: CardType;
+  content: TileContent;
+}
+
 interface Course {
   id: string;
   name: string;
@@ -31,12 +62,13 @@ interface Course {
 interface CourseTileCardProps {
   tile: Tile;
   onEdit: (newContent: TileContent) => void;
+  isInitial?: boolean;
 }
 
-const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
+const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, isInitial = false }) => {
   const renderContent = () => {
     switch (tile.type) {
-      case 'text':
+      case CARD_TYPES.TEXT:
         return (
           <CardContent>
             <Input 
@@ -47,24 +79,25 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
             />
           </CardContent>
         );
-      case 'details':
+      case CARD_TYPES.DETAILS:
+        const detailsContent = tile.content as DetailsTileContent;
         return (
           <CardContent>
             <Input 
               placeholder="Enter Title" 
-              value={(tile.content as DetailsTileContent).title || ''} 
-              onChange={(e) => onEdit({ ...tile.content, title: e.target.value })}
+              value={detailsContent.title || ''} 
+              onChange={(e) => onEdit({ ...detailsContent, title: e.target.value })}
               className="mb-4 text-black"
             />
             <Textarea 
               placeholder="Description..." 
-              value={(tile.content as DetailsTileContent).description || ''} 
-              onChange={(e) => onEdit({ ...tile.content, description: e.target.value })}
+              value={detailsContent.description || ''} 
+              onChange={(e) => onEdit({ ...detailsContent, description: e.target.value })}
             />
           </CardContent>
         );
-      case 'survey':
-      case 'quiz':
+      case CARD_TYPES.SURVEY:
+      case CARD_TYPES.QUIZ:
         const surveyQuizContent = tile.content as SurveyQuizTileContent;
         return (
           <CardContent>
@@ -74,7 +107,7 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
               onChange={(e) => onEdit({ ...surveyQuizContent, question: e.target.value })}
               className="mb-4 text-black"
             />
-            <RadioGroup value={surveyQuizContent.selectedOption || undefined} onValueChange={(value) => onEdit({ ...surveyQuizContent, selectedOption: value })}>
+            <RadioGroup value={surveyQuizContent.selectedOption || undefined}>
               {surveyQuizContent.options?.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2 mb-2">
                   <RadioGroupItem value={option} id={`option-${index}`} />
@@ -101,16 +134,16 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
             </Button>
           </CardContent>
         );
-      case 'form':
+      case CARD_TYPES.FORM:
+        const formContent = tile.content as FormTileContent;
         return (
           <CardContent>
             <Input 
               placeholder="Form Title" 
-              value={(tile.content as FormTileContent).title || ''} 
-              onChange={(e) => onEdit({ ...tile.content, title: e.target.value })}
+              value={formContent.title || ''} 
+              onChange={(e) => onEdit({ ...formContent, title: e.target.value })}
               className="mb-4 text-black"
             />
-            {/* Add form-specific fields here */}
           </CardContent>
         );
       default:
@@ -119,7 +152,7 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
   };
 
   return (
-    <Card className={`w-full max-w-md ${tile.type === 'text' ? 'bg-blue-500 text-white' : ''}`}>
+    <Card className={`w-full max-w-md ${isInitial ? 'bg-blue-500 text-white' : ''}`}>
       <CardHeader>
         <CardTitle>{tile.type.charAt(0).toUpperCase() + tile.type.slice(1)} Tile</CardTitle>
       </CardHeader>
@@ -128,37 +161,66 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit }) => {
   );
 };
 
+interface AddCardDialogProps {
+  onAddCard: (type: CardType) => void;
+}
+
+const AddCardDialog: React.FC<AddCardDialogProps> = ({ onAddCard }) => {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="w-full max-w-md aspect-[3/4] flex items-center justify-center">
+          <Plus className="h-12 w-12" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Card</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-4">
+          {(Object.values(CARD_TYPES) as CardType[]).map((type) => (
+            <Button key={type} onClick={() => onAddCard(type)}>
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </Button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 interface CourseCarouselProps {
   tiles: Tile[];
   currentIndex: number;
   onEdit: (index: number, newContent: TileContent) => void;
+  onAddCard: (type: CardType) => void;
   onNext: () => void;
   onPrevious: () => void;
 }
 
-const CourseCarousel: React.FC<CourseCarouselProps> = ({ tiles, currentIndex, onEdit, onNext, onPrevious }) => {
+const CourseCarousel: React.FC<CourseCarouselProps> = ({ tiles, currentIndex, onEdit, onAddCard, onNext, onPrevious }) => {
+  const visibleTiles = tiles.slice(Math.max(0, currentIndex - 1), Math.min(tiles.length, currentIndex + 2));
+
   return (
-    <div className="relative w-full max-w-md mx-auto">
-      {tiles.length > 0 ? (
-        <CourseTileCard
-          tile={tiles[currentIndex]}
-          onEdit={(newContent) => onEdit(currentIndex, newContent)}
-        />
-      ) : (
-        <div>No tiles yet. Add some tiles to get started!</div>
-      )}
-      <div className="absolute top-1/2 -left-12 -translate-y-1/2">
+    <div className="relative w-full max-w-[calc(3*16rem+2rem)] mx-auto">
+      <div className="flex space-x-4 overflow-x-auto p-4">
+        {visibleTiles.map((tile, index) => (
+          <CourseTileCard
+            key={tile.id}
+            tile={tile}
+            onEdit={(newContent) => onEdit(currentIndex + index - 1, newContent)}
+            isInitial={index === 0 && currentIndex === 0}
+          />
+        ))}
+        {tiles.length < 3 && <AddCardDialog onAddCard={onAddCard} />}
+      </div>
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-4 mt-4">
         <Button variant="outline" onClick={onPrevious} disabled={currentIndex === 0}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-      </div>
-      <div className="absolute top-1/2 -right-12 -translate-y-1/2">
         <Button variant="outline" onClick={onNext} disabled={currentIndex === tiles.length - 1}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-      </div>
-      <div className="text-center mt-4">
-        {tiles.length > 0 ? `Tile ${currentIndex + 1} of ${tiles.length}` : 'No tiles'}
       </div>
     </div>
   );
@@ -181,14 +243,14 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   useEffect(() => {
     const fetchCourse = () => {
       const fetchedCourse = getCourse(id);
-      setCourse(fetchedCourse || null);
+      setCourse(fetchedCourse || { id, name: 'New Course', tiles: [{ id: '1', type: CARD_TYPES.TEXT, content: { title: '' } }] });
       setIsLoading(false);
     };
 
     fetchCourse();
   }, [id, getCourse]);
 
-  const handleAddTile = (type: Tile['type']) => {
+  const handleAddTile = (type: CardType) => {
     if (course) {
       addTile(course.id, type);
       const updatedCourse = getCourse(id);
@@ -199,14 +261,16 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
     }
   };
 
-  const handleEditTile = (index: number, newContent: TileContent) => {
-    if (course) {
+ const handleEditTile = (index: number, newContent: TileContent) => {
+    if (course && course.tiles && index >= 0 && index < course.tiles.length) {
       const tileId = course.tiles[index].id;
       updateTile(course.id, tileId, newContent);
       const updatedCourse = getCourse(id);
       if (updatedCourse) {
         setCourse(updatedCourse);
       }
+    } else {
+      console.error(`Unable to edit tile at index ${index}. Course or tile not found.`);
     }
   };
 
@@ -233,16 +297,10 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
         tiles={course.tiles}
         currentIndex={currentIndex}
         onEdit={handleEditTile}
+        onAddCard={handleAddTile}
         onNext={handleNext}
         onPrevious={handlePrevious}
       />
-      <div className="mt-8 space-x-2 text-center">
-        <Button onClick={() => handleAddTile('text')}>Add Text</Button>
-        <Button onClick={() => handleAddTile('details')}>Add Details</Button>
-        <Button onClick={() => handleAddTile('survey')}>Add Survey</Button>
-        <Button onClick={() => handleAddTile('quiz')}>Add Quiz</Button>
-        <Button onClick={() => handleAddTile('form')}>Add Form</Button>
-      </div>
     </div>
   );
 }
