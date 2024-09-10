@@ -23,7 +23,7 @@ const AddTilePopover: React.FC<AddTilePopoverProps> = ({ onAddCard }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={"outline"} className={` w-12 h-12 flex flex-col items-center justify-center`}>
+        <Button variant={"outline"} className={` w-12 h-12x flex flex-col items-center justify-center`}>
           <Plus className="h-12 w-12" />
         </Button>
       </PopoverTrigger>
@@ -33,10 +33,10 @@ const AddTilePopover: React.FC<AddTilePopoverProps> = ({ onAddCard }) => {
             <Button
               key={type}
               onClick={() => onAddCard(type)}
-              className="flex flex-col items-center justify-center p-2"
+              className="flex flex-col items-center justify-center p-1 m-1 w-12 h-12"
               variant="ghost"
             >
-              <Icon className="h-6 w-6 mb-1" />
+              <Icon className="h-10 w-10 mb-1" />
               <span className="text-xs">{label}</span>
             </Button>
           ))}

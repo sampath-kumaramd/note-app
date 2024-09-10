@@ -18,6 +18,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const getCourse = useCourseStore((state) => state.getCourse);
   const addTile = useCourseStore((state) => state.addTile);
   const updateTile = useCourseStore((state) => state.updateTile);
+  const deleteTile = useCourseStore((state) => state.deleteTile);
   const [course, setCourse] = useState<Course | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,14 +33,14 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
           tiles: [{
             id: '1',
             type: CARD_TYPES.TEXT,
-            content: { title: '' }
+            content: { title: 'Welcome to your new course!' }
           }]
         };
       } else if (fetchedCourse.tiles.length === 0) {
         const newTile = {
           id: '1',
           type: CARD_TYPES.TEXT,
-          content: { title: '' }
+          content: { title: 'Welcome to your course!' }
         };
         fetchedCourse.tiles.push(newTile);
         updateTile(fetchedCourse.id, newTile.id, newTile.content);
@@ -57,7 +58,6 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
       const updatedCourse = getCourse(id);
       if (updatedCourse) {
         setCourse(updatedCourse);
-        // Update currentIndex to show the new tile
         setCurrentIndex(Math.max(0, updatedCourse.tiles.length - 3));
       }
     }
@@ -73,6 +73,18 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
       }
     } else {
       console.error(`Unable to edit tile at index ${index}. Course or tile not found.`);
+    }
+  };
+
+  const handleDeleteTile = (index: number) => {
+    if (course && course.tiles && index >= 0 && index < course.tiles.length) {
+      const tileId = course.tiles[index].id;
+      deleteTile(course.id, tileId);
+      const updatedCourse = getCourse(id);
+      if (updatedCourse) {
+        setCourse(updatedCourse);
+        setCurrentIndex(Math.max(0, Math.min(currentIndex, updatedCourse.tiles.length - 3)));
+      }
     }
   };
 
@@ -102,6 +114,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
         onAddCard={handleAddTile}
         onNext={handleNext}
         onPrevious={handlePrevious}
+        onDelete={handleDeleteTile}
       />
     </div>
   );

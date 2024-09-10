@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { AlignLeft, ChevronLeft, ChevronRight, Trash2, Type } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Tile } from '@/store/courseStore';
@@ -10,6 +10,7 @@ import { CardType, TileContent } from '@/types/types';
 import AddTilePopover from './AddTilePopover';
 import CourseTileCard from './CourseTileCard';
 
+
 interface CourseCarouselProps {
   tiles: Tile[];
   currentIndex: number;
@@ -17,6 +18,7 @@ interface CourseCarouselProps {
   onAddCard: (type: CardType) => void;
   onNext: () => void;
   onPrevious: () => void;
+  onDelete: (index: number) => void;
 }
 
 const CourseCarousel: React.FC<CourseCarouselProps> = ({ 
@@ -25,39 +27,59 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   onEdit, 
   onAddCard, 
   onNext, 
-  onPrevious 
+  onPrevious,
+  onDelete
 }) => {
   const visibleTiles = tiles.slice(currentIndex, currentIndex + 3);
 
   const handleEdit = (tileIndex: number, newContent: TileContent) => {
+    console.log('Editing tile at index:', tileIndex, 'New content:', newContent);
     onEdit(tileIndex, newContent);
   };
 
   return (
-    <div className="relative w-full max-w-[calc(4*16rem+3rem)] mx-auto">
-      <div className="flex items-center space-x-4 overflow-x-auto p-4">
+    <div className="relative w-full  mx-auto">
+      <div className="flex items-center justify-center space-x-4 overflow-x-auto p-4">
+        {tiles.length > 3 && (
+          <Button variant="ghost" onClick={onPrevious} disabled={currentIndex === 0} className="absolute left-0 top-1/2 transform -translate-y-1/2">
+            <ChevronLeft className="h-8 w-8" />
+          </Button>
+        )}
         {visibleTiles.map((tile, index) => (
-          <CourseTileCard
-            key={tile.id}
-            tile={tile}
-            onEdit={(newContent) => handleEdit(currentIndex + index, newContent)}
-            isInitial={currentIndex + index === 0}
-          />
-        ))}
-        {[...Array(Math.max(0, 3 - visibleTiles.length))].map((_, index) => (
-          <div key={`empty-${index}`} className={`${tileStyles.card} border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center`}>
-            <span className="text-gray-400">Empty Tile</span>
+          <div key={tile.id} className="relative">
+            <CourseTileCard
+              tile={tile}
+              onEdit={(newContent) => handleEdit(currentIndex + index, newContent)}
+              isInitial={currentIndex + index === 0}
+            />
+            {index === 1 && (
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                <Button variant="outline" onClick={onPrevious} disabled={currentIndex === 0}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" onClick={onNext} disabled={currentIndex >= tiles.length - 3}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-white p-1 rounded-md shadow-md">
+              <Button variant="ghost" size="sm"><Type className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm"><AlignLeft className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm">
+                {/* <Image className="h-4 w-4" /> */}Image
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => onDelete(currentIndex + index)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
           </div>
         ))}
-        <AddTilePopover onAddCard={onAddCard} />
-      </div>
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-4 mt-4">
-        <Button variant="outline" onClick={onPrevious} disabled={currentIndex === 0}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" onClick={onNext} disabled={currentIndex >= tiles.length - 3}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        {/* {visibleTiles.length < 3 && ( */}
+          <AddTilePopover onAddCard={onAddCard} />
+        {/* )} */}
+        {tiles.length > 3 && (
+          <Button variant="ghost" onClick={onNext} disabled={currentIndex >= tiles.length - 3} className="absolute right-0 top-1/2 transform -translate-y-1/2">
+            <ChevronRight className="h-8 w-8" />
+          </Button>
+        )}
       </div>
     </div>
   );
