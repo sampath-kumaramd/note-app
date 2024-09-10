@@ -4,6 +4,7 @@ import { Plus, Type, AlignLeft, FileText, Link, Video } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { tileStyles } from '@/styles/tileStyles';
 import { CARD_TYPES, CardType } from '@/types/types';
 
 interface AddTilePopoverProps {
@@ -11,22 +12,19 @@ interface AddTilePopoverProps {
 }
 
 const AddTilePopover: React.FC<AddTilePopoverProps> = ({ onAddCard }) => {
-
   const tileTypes = [
     { type: CARD_TYPES.TEXT, icon: Type, label: 'Title' },
     { type: CARD_TYPES.DETAILS, icon: AlignLeft, label: 'Content' },
     { type: CARD_TYPES.QUIZ, icon: FileText, label: 'Quiz' },
     { type: CARD_TYPES.SURVEY, icon: Link, label: 'Survey' },
     { type: CARD_TYPES.FORM, icon: Video, label: 'Video' },
-  
   ];
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="w-64 h-96 flex flex-col items-center justify-center">
-          <Plus className="h-12 w-12 mb-2" />
-          <span>Add Tile</span>
+        <Button variant={"outline"} className={` w-12 h-12 flex flex-col items-center justify-center`}>
+          <Plus className="h-12 w-12" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48">

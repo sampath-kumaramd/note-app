@@ -32,14 +32,14 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
           tiles: [{
             id: '1',
             type: CARD_TYPES.TEXT,
-            content: { title: 'Welcome to your new course!' }
+            content: { title: '' }
           }]
         };
       } else if (fetchedCourse.tiles.length === 0) {
         const newTile = {
           id: '1',
           type: CARD_TYPES.TEXT,
-          content: { title: 'Welcome to your course!' }
+          content: { title: '' }
         };
         fetchedCourse.tiles.push(newTile);
         updateTile(fetchedCourse.id, newTile.id, newTile.content);
