@@ -19,6 +19,7 @@ interface CourseCarouselProps {
   onNext: () => void;
   onPrevious: () => void;
   onDelete: (index: number) => void;
+  lastAddedCardId: string | null;
 }
 
 const CourseCarousel: React.FC<CourseCarouselProps> = ({ 
@@ -28,7 +29,8 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   onAddCard, 
   onNext, 
   onPrevious,
-  onDelete
+  onDelete,
+  lastAddedCardId
 }) => {
   const visibleTiles = tiles.slice(currentIndex, currentIndex + 3);
 
@@ -38,15 +40,18 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   };
 
   return (
-    <div className="relative w-full  mx-auto">
-      <div className="flex items-center justify-center space-x-4 overflow-x-auto p-4">
+    <div className="relative w-full mx-auto">
+      <div className="flex items-center justify-center space-x-4 p-4">
         {tiles.length > 3 && (
           <Button variant="ghost" onClick={onPrevious} disabled={currentIndex === 0} className="absolute left-0 top-1/2 transform -translate-y-1/2">
             <ChevronLeft className="h-8 w-8" />
           </Button>
         )}
         {visibleTiles.map((tile, index) => (
-          <div key={tile.id} className="relative">
+          <div 
+            key={tile.id} 
+            className={`relative ${tile.id === lastAddedCardId ? 'highlight-new-card' : ''}`}
+          >
             <CourseTileCard
               tile={tile}
               onEdit={(newContent) => handleEdit(currentIndex + index, newContent)}
@@ -65,16 +70,12 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
             <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-white p-1 rounded-md shadow-md">
               <Button variant="ghost" size="sm"><Type className="h-4 w-4" /></Button>
               <Button variant="ghost" size="sm"><AlignLeft className="h-4 w-4" /></Button>
-              <Button variant="ghost" size="sm">
-                {/* <Image className="h-4 w-4" /> */}Image
-              </Button>
+              <Button variant="ghost" size="sm">Image</Button>
               <Button variant="ghost" size="sm" onClick={() => onDelete(currentIndex + index)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           </div>
         ))}
-        {/* {visibleTiles.length < 3 && ( */}
-          <AddTilePopover onAddCard={onAddCard} />
-        {/* )} */}
+        <AddTilePopover onAddCard={onAddCard} />
         {tiles.length > 3 && (
           <Button variant="ghost" onClick={onNext} disabled={currentIndex >= tiles.length - 3} className="absolute right-0 top-1/2 transform -translate-y-1/2">
             <ChevronRight className="h-8 w-8" />

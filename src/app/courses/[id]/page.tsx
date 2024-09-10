@@ -22,6 +22,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const [course, setCourse] = useState<Course | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastAddedCardId, setLastAddedCardId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCourse = () => {
@@ -52,16 +53,20 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
     fetchCourse();
   }, [id, getCourse, updateTile]);
 
-  const handleAddTile = (type: CardType) => {
-    if (course) {
-      addTile(course.id, type);
-      const updatedCourse = getCourse(id);
-      if (updatedCourse) {
-        setCourse(updatedCourse);
-        setCurrentIndex(Math.max(0, updatedCourse.tiles.length - 3));
-      }
+ const handleAddTile = (type: CardType) => {
+  if (course) {
+    addTile(course.id, type);
+    const updatedCourse = getCourse(id);
+    if (updatedCourse) {
+      const newTileId = updatedCourse.tiles[updatedCourse.tiles.length - 1].id;
+      setLastAddedCardId(newTileId);
+      setTimeout(() => setLastAddedCardId(null), 3000); // Reset after 3 seconds
+
+      setCourse(updatedCourse);
+      setCurrentIndex(Math.max(0, updatedCourse.tiles.length - 3));
     }
-  };
+  }
+};
 
   const handleEditTile = (index: number, newContent: TileContent) => {
     if (course && course.tiles && index >= 0 && index < course.tiles.length) {
@@ -115,6 +120,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
         onNext={handleNext}
         onPrevious={handlePrevious}
         onDelete={handleDeleteTile}
+        lastAddedCardId={lastAddedCardId}
       />
     </div>
   );

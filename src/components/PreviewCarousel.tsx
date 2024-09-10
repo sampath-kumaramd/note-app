@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tile } from '@/store/courseStore';
 import { tileStyles } from '@/styles/tileStyles';
 
+import ViewCourseTileCard from './ViewCourseTileCard';
 
 interface PreviewCarouselProps {
   tiles: Tile[];
@@ -56,7 +57,7 @@ const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ tiles }) => {
   };
 
   return (
-    <div className="relative w-full h-[500px] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-[70vh] flex items-center justify-center overflow-hidden">
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={currentIndex}
@@ -83,24 +84,26 @@ const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ tiles }) => {
           }}
           className={`${tileStyles.card} absolute cursor-grab active:cursor-grabbing`}
         >
-          <div className="w-full h-full p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">{tiles[currentIndex].type} Tile</h2>
-            <p>{JSON.stringify(tiles[currentIndex].content)}</p>
-          </div>
+          <ViewCourseTileCard tile={tiles[currentIndex]} />
         </motion.div>
       </AnimatePresence>
       <Button
         className="absolute left-4 z-10"
         onClick={() => paginate(-1)}
       >
-        <ChevronLeft />
+        <ChevronLeft className="h-8 w-8" />
       </Button>
       <Button
         className="absolute right-4 z-10"
         onClick={() => paginate(1)}
       >
-        <ChevronRight />
+        <ChevronRight className="h-8 w-8" />
       </Button>
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <p className="text-sm font-medium">
+          Tile {currentIndex + 1} of {tiles.length}
+        </p>
+      </div>
     </div>
   );
 };
