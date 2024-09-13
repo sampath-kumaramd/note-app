@@ -127,16 +127,16 @@ const Toolbar: React.FC<ToolbarProps> = ({ onBold, onItalic, onAlign, onVertical
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => onFontSize('1')}>
+                <DropdownMenuItem onSelect={() => onFontSize('3')}>
                   Small
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onFontSize('2')}>
+                <DropdownMenuItem onSelect={() => onFontSize('4')}>
                   Normal
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onFontSize('3')}>
+                <DropdownMenuItem onSelect={() => onFontSize('6')}>
                   Large
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onFontSize('4')}>
+                <DropdownMenuItem onSelect={() => onFontSize('8')}>
                   Extra Large
                 </DropdownMenuItem>
               </DropdownMenuContent>

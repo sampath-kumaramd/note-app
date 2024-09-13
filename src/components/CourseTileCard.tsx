@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 
-import { Move } from 'lucide-react';
+import { Move, Trash2 } from 'lucide-react';
 
 import { CARD_TYPES, CardType, DetailsTileContent, FormTileContent, SurveyQuizTileContent, TextTileContent, TileContent } from '@/types/types';
 
@@ -9,6 +9,7 @@ import DetailsTile from './DetailsTile';
 import FormTile from './FormTile';
 import SurveyQuizTile from './SurveyQuizTile';
 import TextTile from './TextTile';
+import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -20,11 +21,12 @@ interface CourseTileCardProps {
   };
   onEdit: (newContent: TileContent) => void;
   onReorder: (toIndex: number) => void;
+  onDelete: () => void;
   totalTiles: number;
   currentIndex: number;
 }
 
-const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, onReorder, totalTiles, currentIndex }) => {
+const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, onReorder, onDelete, totalTiles, currentIndex }) => {
   const renderTile = () => {
     switch (tile.type) {
       case CARD_TYPES.TEXT:
@@ -44,8 +46,7 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, onReorder
 
   return (
     <div className="relative">
-      {renderTile()}
-      <div className="absolute top-0 right-0 p-2">
+      <div className="absolute top-0 left-0 p-2">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -68,6 +69,21 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, onReorder
           </Tooltip>
         </TooltipProvider>
       </div>
+      <div className="absolute top-0 right-0 p-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={onDelete}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Remove tile</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      {renderTile()}
     </div>
   );
 };

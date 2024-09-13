@@ -76,13 +76,14 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
             tabIndex={0}
             aria-pressed={selectedCardId === tile.id}
           >
-            <CourseTileCard
-              tile={tile}
-              onEdit={(newContent) => handleEdit(index, newContent)}
-              onReorder={(toIndex) => handleReorder(index, toIndex)}
-              totalTiles={tiles.length}
-              currentIndex={currentIndex + index}
-            />
+           <CourseTileCard
+  tile={tile}
+  onEdit={(newContent) => handleEdit(index, newContent)}
+  onReorder={(toIndex) => handleReorder(index, toIndex)}
+  onDelete={() => onDelete(currentIndex + index)}
+  totalTiles={tiles.length}
+  currentIndex={currentIndex + index}
+/>
           </div>
         ))}
         <AddTilePopover onAddCard={onAddCard} />
