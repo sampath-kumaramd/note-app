@@ -107,3 +107,19 @@
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
   transform: translateY(-5px);
 }
+
+@keyframes pulseSelected {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.highlight-selected-card {
+  animation: pulseSelected 2s infinite;
+}

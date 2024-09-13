@@ -1,15 +1,13 @@
-import React from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 
-import { AlignLeft, ChevronLeft, ChevronRight, Trash2, Type } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Tile } from '@/store/courseStore';
-import { tileStyles } from '@/styles/tileStyles';
 import { CardType, TileContent } from '@/types/types';
 
 import AddTilePopover from './AddTilePopover';
 import CourseTileCard from './CourseTileCard';
-
 
 interface CourseCarouselProps {
   tiles: Tile[];
@@ -19,6 +17,7 @@ interface CourseCarouselProps {
   onNext: () => void;
   onPrevious: () => void;
   onDelete: (index: number) => void;
+  onReorder: (fromIndex: number, toIndex: number) => void;
   lastAddedCardId: string | null;
 }
 
@@ -30,13 +29,29 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   onNext, 
   onPrevious,
   onDelete,
+  onReorder,
   lastAddedCardId
 }) => {
   const visibleTiles = tiles.slice(currentIndex, currentIndex + 3);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const handleEdit = (tileIndex: number, newContent: TileContent) => {
-    console.log('Editing tile at index:', tileIndex, 'New content:', newContent);
-    onEdit(tileIndex, newContent);
+    onEdit(currentIndex + tileIndex, newContent);
+  };
+
+  const handleCardInteraction = (tileId: string) => {
+    setSelectedCardId(tileId);
+    setTimeout(() => setSelectedCardId(null), 3000);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>, tileId: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      handleCardInteraction(tileId);
+    }
+  };
+
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    onReorder(currentIndex + fromIndex, toIndex);
   };
 
   return (
@@ -50,29 +65,20 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
         {visibleTiles.map((tile, index) => (
           <div 
             key={tile.id} 
-            className={`relative ${tile.id === lastAddedCardId ? 'highlight-new-card' : ''}`}
+            className={`relative ${tile.id === lastAddedCardId ? 'highlight-new-card' : ''} ${tile.id === selectedCardId ? 'highlight-selected-card' : ''}`}
+            onClick={() => handleCardInteraction(tile.id)}
+            onKeyDown={(e) => handleKeyDown(e, tile.id)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={selectedCardId === tile.id}
           >
             <CourseTileCard
               tile={tile}
-              onEdit={(newContent) => handleEdit(currentIndex + index, newContent)}
-              isInitial={currentIndex + index === 0}
+              onEdit={(newContent) => handleEdit(index, newContent)}
+              onReorder={(toIndex) => handleReorder(index, toIndex)}
+              totalTiles={tiles.length}
+              currentIndex={currentIndex + index}
             />
-            {index === 1 && (
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                <Button variant="outline" onClick={onPrevious} disabled={currentIndex === 0}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" onClick={onNext} disabled={currentIndex >= tiles.length - 3}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-white p-1 rounded-md shadow-md">
-              <Button variant="ghost" size="sm"><Type className="h-4 w-4" /></Button>
-              <Button variant="ghost" size="sm"><AlignLeft className="h-4 w-4" /></Button>
-              <Button variant="ghost" size="sm">Image</Button>
-              <Button variant="ghost" size="sm" onClick={() => onDelete(currentIndex + index)}><Trash2 className="h-4 w-4" /></Button>
-            </div>
           </div>
         ))}
         <AddTilePopover onAddCard={onAddCard} />

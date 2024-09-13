@@ -19,6 +19,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const addTile = useCourseStore((state) => state.addTile);
   const updateTile = useCourseStore((state) => state.updateTile);
   const deleteTile = useCourseStore((state) => state.deleteTile);
+  const reorderTiles = useCourseStore((state) => state.reorderTiles);
   const [course, setCourse] = useState<Course | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,20 +54,20 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
     fetchCourse();
   }, [id, getCourse, updateTile]);
 
- const handleAddTile = (type: CardType) => {
-  if (course) {
-    addTile(course.id, type);
-    const updatedCourse = getCourse(id);
-    if (updatedCourse) {
-      const newTileId = updatedCourse.tiles[updatedCourse.tiles.length - 1].id;
-      setLastAddedCardId(newTileId);
-      setTimeout(() => setLastAddedCardId(null), 3000); // Reset after 3 seconds
+  const handleAddTile = (type: CardType) => {
+    if (course) {
+      addTile(course.id, type);
+      const updatedCourse = getCourse(id);
+      if (updatedCourse) {
+        const newTileId = updatedCourse.tiles[updatedCourse.tiles.length - 1].id;
+        setLastAddedCardId(newTileId);
+        setTimeout(() => setLastAddedCardId(null), 3000);
 
-      setCourse(updatedCourse);
-      setCurrentIndex(Math.max(0, updatedCourse.tiles.length - 3));
+        setCourse(updatedCourse);
+        setCurrentIndex(Math.max(0, updatedCourse.tiles.length - 3));
+      }
     }
-  }
-};
+  };
 
   const handleEditTile = (index: number, newContent: TileContent) => {
     if (course && course.tiles && index >= 0 && index < course.tiles.length) {
@@ -89,6 +90,20 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
       if (updatedCourse) {
         setCourse(updatedCourse);
         setCurrentIndex(Math.max(0, Math.min(currentIndex, updatedCourse.tiles.length - 3)));
+      }
+    }
+  };
+
+  const handleReorderTile = (fromIndex: number, toIndex: number) => {
+    if (course) {
+      const newTiles = [...course.tiles];
+      const [movedTile] = newTiles.splice(fromIndex, 1);
+      newTiles.splice(toIndex, 0, movedTile);
+      reorderTiles(course.id, newTiles);
+      const updatedCourse = getCourse(id);
+      if (updatedCourse) {
+        setCourse(updatedCourse);
+        setCurrentIndex(Math.max(0, Math.min(toIndex, updatedCourse.tiles.length - 3)));
       }
     }
   };
@@ -120,6 +135,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
         onNext={handleNext}
         onPrevious={handlePrevious}
         onDelete={handleDeleteTile}
+        onReorder={handleReorderTile}
         lastAddedCardId={lastAddedCardId}
       />
     </div>

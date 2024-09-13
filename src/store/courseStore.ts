@@ -20,6 +20,7 @@ interface CourseStore {
   addTile: (courseId: string, tileType: Tile['type']) => void;
   updateTile: (courseId: string, tileId: string, newContent: any) => void;
   deleteTile: (courseId: string, tileId: string) => void;
+  reorderTiles: (courseId: string, newTileOrder: Tile[]) => void;
 }
 
 export const useCourseStore = create<CourseStore>()(
@@ -74,6 +75,19 @@ export const useCourseStore = create<CourseStore>()(
               return {
                 ...course,
                 tiles: course.tiles.filter((tile) => tile.id !== tileId),
+              };
+            }
+            return course;
+          }),
+        }));
+      },
+      reorderTiles: (courseId: string, newTileOrder: Tile[]) => {
+        set((state) => ({
+          courses: state.courses.map((course) => {
+            if (course.id === courseId) {
+              return {
+                ...course,
+                tiles: newTileOrder,
               };
             }
             return course;
