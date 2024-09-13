@@ -3,8 +3,7 @@ import React, { useState, KeyboardEvent } from 'react';
 import { ChevronLeft, ChevronRight, Save, ArrowLeft } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
-import { Tile } from '@/store/courseStore';
-import { CardType, TileContent } from '@/types/types';
+import { CardType, TileContent, Tile } from '@/types/types';
 
 import AddTilePopover from './AddTilePopover';
 import CourseTileCard from './CourseTileCard';
@@ -77,13 +76,13 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
             aria-pressed={selectedCardId === tile.id}
           >
            <CourseTileCard
-  tile={tile}
-  onEdit={(newContent) => handleEdit(index, newContent)}
-  onReorder={(toIndex) => handleReorder(index, toIndex)}
-  onDelete={() => onDelete(currentIndex + index)}
-  totalTiles={tiles.length}
-  currentIndex={currentIndex + index}
-/>
+              tile={tile}
+              onEdit={(newContent) => handleEdit(index, newContent)}
+              onReorder={(toIndex) => handleReorder(index, toIndex)}
+              onDelete={() => onDelete(currentIndex + index)}
+              totalTiles={tiles.length}
+              currentIndex={currentIndex + index}
+            />
           </div>
         ))}
         <AddTilePopover onAddCard={onAddCard} />
