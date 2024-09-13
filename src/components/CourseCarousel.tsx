@@ -1,6 +1,6 @@
 import React, { useState, KeyboardEvent } from 'react';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, ArrowLeft } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Tile } from '@/store/courseStore';
@@ -18,6 +18,8 @@ interface CourseCarouselProps {
   onPrevious: () => void;
   onDelete: (index: number) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
+  onSave: () => void;
+  onGoBack: () => void;
   lastAddedCardId: string | null;
 }
 
@@ -30,6 +32,8 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   onPrevious,
   onDelete,
   onReorder,
+  onSave,
+  onGoBack,
   lastAddedCardId
 }) => {
   const visibleTiles = tiles.slice(currentIndex, currentIndex + 3);
@@ -55,7 +59,7 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
   };
 
   return (
-    <div className="relative w-full mx-auto">
+    <div className="relative w-full mx-auto ">
       <div className="flex items-center justify-center space-x-4 p-4">
         {tiles.length > 3 && (
           <Button variant="ghost" onClick={onPrevious} disabled={currentIndex === 0} className="absolute left-0 top-1/2 transform -translate-y-1/2">
@@ -87,6 +91,14 @@ const CourseCarousel: React.FC<CourseCarouselProps> = ({
             <ChevronRight className="h-8 w-8" />
           </Button>
         )}
+      </div>
+      <div className="flex justify-between mt-4">
+        <Button onClick={onGoBack} className="flex items-center">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+        </Button>
+        <Button onClick={onSave} className="flex items-center">
+          <Save className="mr-2 h-4 w-4" /> Save Course
+        </Button>
       </div>
     </div>
   );

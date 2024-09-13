@@ -21,6 +21,8 @@ interface CourseStore {
   updateTile: (courseId: string, tileId: string, newContent: any) => void;
   deleteTile: (courseId: string, tileId: string) => void;
   reorderTiles: (courseId: string, newTileOrder: Tile[]) => void;
+  updateCourse: (courseId: string, updatedCourse: Course) => void;
+  removeCourse: (courseId: string) => void;
 }
 
 export const useCourseStore = create<CourseStore>()(
@@ -92,6 +94,18 @@ export const useCourseStore = create<CourseStore>()(
             }
             return course;
           }),
+        }));
+      },
+      updateCourse: (courseId: string, updatedCourse: Course) => {
+        set((state) => ({
+          courses: state.courses.map((course) =>
+            course.id === courseId ? updatedCourse : course
+          ),
+        }));
+      },
+      removeCourse: (courseId: string) => {
+        set((state) => ({
+          courses: state.courses.filter((course) => course.id !== courseId),
         }));
       },
     }),

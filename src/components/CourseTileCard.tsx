@@ -1,7 +1,7 @@
+"use client"
 import React from 'react';
 
-import { ChevronDown } from 'lucide-react';
-
+import { Move } from 'lucide-react';
 
 import { CARD_TYPES, CardType, DetailsTileContent, FormTileContent, SurveyQuizTileContent, TextTileContent, TileContent } from '@/types/types';
 
@@ -10,6 +10,7 @@ import FormTile from './FormTile';
 import SurveyQuizTile from './SurveyQuizTile';
 import TextTile from './TextTile';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface CourseTileCardProps {
   tile: {
@@ -44,19 +45,28 @@ const CourseTileCard: React.FC<CourseTileCardProps> = ({ tile, onEdit, onReorder
   return (
     <div className="relative">
       {renderTile()}
-      <div className="absolute bottom-0 left-0 right-0 flex justify-center space-x-2 p-2 bg-gray-100 rounded-b-lg">
-        <Select onValueChange={(value) => onReorder(parseInt(value))}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Reorder" />
-          </SelectTrigger>
-          <SelectContent>
-            {Array.from({ length: totalTiles }, (_, i) => (
-              <SelectItem key={i} value={i.toString()} disabled={i === currentIndex}>
-                {i === currentIndex ? 'Current Position' : `Move to position ${i + 1}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="absolute top-0 right-0 p-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Select onValueChange={(value) => onReorder(parseInt(value))}>
+                <SelectTrigger className="w-12 h-10 p-0 px-1" >
+                  <SelectValue placeholder={<Move className="h-4 w-4" />} />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: totalTiles }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()} disabled={i === currentIndex}>
+                      {i === currentIndex ? 'Current' : `Move to ${i + 1}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Reorder tile</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
