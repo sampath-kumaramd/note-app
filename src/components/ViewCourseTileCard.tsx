@@ -7,9 +7,8 @@ import ViewFormTile from './ViewFormTile';
 import ViewSurveyQuizTile from './ViewSurveyQuizTile';
 import ViewTextTile from './ViewTextTile';
 
-
 interface ViewCourseTileCardProps {
-  tile: {
+  tile?: {
     id: string;
     type: CardType;
     content: TileContent;
@@ -17,6 +16,10 @@ interface ViewCourseTileCardProps {
 }
 
 const ViewCourseTileCard: React.FC<ViewCourseTileCardProps> = ({ tile }) => {
+  if (!tile) {
+    return <div className="p-4 bg-gray-100 rounded-lg">No tile data available</div>;
+  }
+
   switch (tile.type) {
     case CARD_TYPES.TEXT:
       return <ViewTextTile content={tile.content as TextTileContent} />;
@@ -29,7 +32,7 @@ const ViewCourseTileCard: React.FC<ViewCourseTileCardProps> = ({ tile }) => {
     case CARD_TYPES.FORM:
       return <ViewFormTile content={tile.content as FormTileContent} />;
     default:
-      return null;
+      return <div className="p-4 bg-gray-100 rounded-lg">Unknown tile type</div>;
   }
 };
 

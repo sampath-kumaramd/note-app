@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
-import { Tile } from '@/store/courseStore';
 import { tileStyles } from '@/styles/tileStyles';
+import { Tile } from '@/types/types';
 
 import ViewCourseTileCard from './ViewCourseTileCard';
 

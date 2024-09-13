@@ -18,9 +18,9 @@ const PreviewModal: React.FC<PreviewModalProps> = ({ course, isOpen, onClose }) 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[90%] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{course.name} - Preview</DialogTitle>
+          <DialogTitle>{course.data.name} - Preview</DialogTitle>
         </DialogHeader>
-        <PreviewCarousel tiles={course.tiles} />
+        <PreviewCarousel tiles={course.data.tiles} />
       </DialogContent>
     </Dialog>
   );

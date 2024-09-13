@@ -39,8 +39,13 @@ export interface Tile {
   content: TileContent;
 }
 
-export interface Course {
-  id: string;
+export interface CourseData {
   name: string;
   tiles: Tile[];
+}
+
+export interface Course {
+  _id: string;
+  data: CourseData;
+  __v: number;
 }

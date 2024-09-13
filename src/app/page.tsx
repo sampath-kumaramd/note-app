@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -14,23 +14,44 @@ import { Course } from '@/types/types';
 
 const MainPage: React.FC = () => {
   const router = useRouter();
-  const courses = useCourseStore((state) => state.courses);
-  const addCourse = useCourseStore((state) => state.addCourse);
+  const { courses, getAllCourses, addCourse } = useCourseStore();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newCourseName, setNewCourseName] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setIsLoading(true);
+        await getAllCourses();
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch courses. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [getAllCourses]);
 
   const handleCreateCourse = () => {
     setIsCreateDialogOpen(true);
   };
 
-  const handleConfirmCreate = () => {
+  const handleConfirmCreate = async () => {
     if (newCourseName.trim()) {
-      const newCourseId = addCourse(newCourseName.trim());
-      setIsCreateDialogOpen(false);
-      setNewCourseName('');
-      router.push(`/courses/${newCourseId}`);
+      try {
+        const newCourseId = await addCourse(newCourseName.trim());
+        setIsCreateDialogOpen(false);
+        setNewCourseName('');
+        router.push(`/courses/${newCourseId}`);
+      } catch (err) {
+        setError('Failed to create course. Please try again.');
+      }
     }
   };
 
@@ -38,6 +59,19 @@ const MainPage: React.FC = () => {
     setSelectedCourse(course);
     setIsPreviewOpen(true);
   };
+
+  if (isLoading) {
+    return <div className="container mx-auto p-4">Loading courses...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <p className="text-red-500">{error}</p>
+        <Button onClick={() => getAllCourses()}>Retry</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -52,20 +86,20 @@ const MainPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((course) => (
           <Card 
-            key={course.id} 
+            key={course._id} 
             className="cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => handleCardClick(course)}
           >
             <CardHeader>
-              <CardTitle>{course.name}</CardTitle>
+              <CardTitle>{course.data.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>{course.tiles.length} tiles</p>
+              <p>{course.data.tiles.length} tiles</p>
               <Button 
                 className="mt-2"
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/courses/${course.id}`);
+                  router.push(`/courses/${course._id}`);
                 }}
               >
                 Edit Course

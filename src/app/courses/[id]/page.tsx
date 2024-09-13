@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import CourseCarousel from '@/components/CourseCarousel';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useCourseStore, Tile } from '@/store/courseStore';
-import { Course, TileContent } from '@/types/types';
+import { useCourseStore } from '@/store/courseStore';
+import { CourseData, Tile, TileContent, CARD_TYPES, CardType } from '@/types/types';
 
 interface CourseCreatePageProps {
   params: { id: string };
@@ -17,10 +17,8 @@ interface CourseCreatePageProps {
 export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const router = useRouter();
   const { id } = params;
-  const getCourse = useCourseStore((state) => state.getCourse);
-  const updateCourse = useCourseStore((state) => state.updateCourse);
-  const removeCourse = useCourseStore((state) => state.removeCourse);
-  const [course, setCourse] = useState<Course | null>(null);
+  const { getCourse, updateCourse, removeCourse } = useCourseStore();
+  const [course, setCourse] = useState<CourseData | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [lastAddedCardId, setLastAddedCardId] = useState<string | null>(null);
@@ -28,43 +26,32 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
   const [isWarningDialogOpen, setIsWarningDialogOpen] = useState(false);
 
   useEffect(() => {
-    const fetchCourse = () => {
-      let fetchedCourse = getCourse(id);
-      if (!fetchedCourse) {
-        fetchedCourse = {
-          id,
-          name: 'New Course',
-          tiles: [{
-            id: '1',
-            type: 'text',
-            content: { title: 'Welcome to your new course!' }
-          }]
-        };
-        setUnsavedChanges(true);
-      } else if (fetchedCourse.tiles.length === 0) {
-        const newTile: Tile = {
-          id: '1',
-          type: 'text',
-          content: { title: 'Welcome to your course!' }
-        };
-        fetchedCourse.tiles.push(newTile);
-        setUnsavedChanges(true);
+    const fetchCourse = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedCourse = await getCourse(id);
+        if (fetchedCourse) {
+          setCourse(fetchedCourse);
+        } else {
+          console.error('Course not found');
+        }
+      } catch (error) {
+        console.error('Error fetching course:', error);
       }
-      setCourse(fetchedCourse);
       setIsLoading(false);
     };
 
     fetchCourse();
   }, [id, getCourse]);
 
-  const handleAddTile = (type: Tile['type']) => {
+  const handleAddTile = async (type: CardType) => {
     if (course) {
       const newTile: Tile = {
         id: Date.now().toString(),
         type: type,
-        content: {} as TileContent
+        content: getInitialContent(type)
       };
-      const updatedCourse: Course = {
+      const updatedCourse: CourseData = {
         ...course,
         tiles: [...course.tiles, newTile]
       };
@@ -73,6 +60,22 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
       setTimeout(() => setLastAddedCardId(null), 3000);
       setCurrentIndex(Math.max(0, updatedCourse.tiles.length - 3));
       setUnsavedChanges(true);
+    }
+  };
+
+  const getInitialContent = (type: CardType): TileContent => {
+    switch (type) {
+      case CARD_TYPES.TEXT:
+        return { title: 'New Text Tile' };
+      case CARD_TYPES.DETAILS:
+        return { title: 'New Details Tile', description: '' };
+      case CARD_TYPES.SURVEY:
+      case CARD_TYPES.QUIZ:
+        return { question: 'New Question', options: [], selectedOption: null };
+      case CARD_TYPES.FORM:
+        return { title: 'New Form Tile' };
+      default:
+        throw new Error(`Unsupported card type: ${type}`);
     }
   };
 
@@ -113,11 +116,15 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
     setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (course) {
-      updateCourse(course.id, course);
-      setUnsavedChanges(false);
-      router.push('/'); // Navigate to home page after saving
+      try {
+        await updateCourse(id, course);
+        setUnsavedChanges(false);
+        router.push('/');
+      } catch (error) {
+        console.error('Error saving course:', error);
+      }
     }
   };
 
@@ -130,10 +137,14 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
     }
   };
 
-  const handleConfirmGoBack = () => {
+  const handleConfirmGoBack = async () => {
     setIsWarningDialogOpen(false);
-    removeCourse(id);
-    router.push('/');
+    try {
+      await removeCourse(id);
+      router.push('/');
+    } catch (error) {
+      console.error('Error removing course:', error);
+    }
   };
 
   if (isLoading) {
@@ -171,7 +182,7 @@ export default function CourseCreatePage({ params }: CourseCreatePageProps) {
             <Button variant="outline" onClick={() => setIsWarningDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleConfirmGoBack} variant={"destructive"}>
+            <Button onClick={handleConfirmGoBack} variant="destructive">
               Go Back and Delete
             </Button>
           </DialogFooter>
