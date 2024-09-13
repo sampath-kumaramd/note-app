@@ -10,13 +10,29 @@ interface ViewDetailsTileProps {
 
 const ViewDetailsTile: React.FC<ViewDetailsTileProps> = ({ content }) => {
   return (
-    <Card className={tileStyles.card}>
-      <CardHeader>
-        <CardTitle>Details Tile</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <h2 className="text-xl font-bold mb-2">{content.title || 'No title'}</h2>
-        <p>{content.description || 'No description'}</p>
+<Card className={tileStyles.card}>
+      <CardContent className="flex flex-col h-full">
+        <div
+          className="text-2xl font-bold mb-2"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent:  'center',
+            textAlign: 'center',
+            minHeight: '50px'
+          }}
+          dangerouslySetInnerHTML={{ __html: content.title || 'No title' }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            textAlign:  'left',
+            minHeight: '100px'
+          }}
+          dangerouslySetInnerHTML={{ __html: content.description || 'No description' }}
+        />
       </CardContent>
     </Card>
   );

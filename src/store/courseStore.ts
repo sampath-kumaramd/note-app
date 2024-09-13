@@ -11,6 +11,7 @@ export interface Tile {
   id: string;
   type: 'text' | 'details' | 'survey' | 'quiz' | 'form';
   content: any;
+  position?: 'top' | 'middle' | 'bottom';
 }
 
 interface CourseStore {
