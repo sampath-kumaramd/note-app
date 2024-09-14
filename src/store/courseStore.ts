@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { create } from 'zustand';
 
+import { env } from '@/lib/env';
 import {
   Course,
   CourseData,
@@ -27,7 +28,7 @@ interface CourseStore {
   removeCourse: (courseId: string) => Promise<void>;
 }
 
-const API_URL = 'https://course-generator-omega.vercel.app/api/courses';
+const API_URL = env.NEXT_PUBLIC_API_URL;
 
 const getInitialContent = (type: CardType): TileContent => {
   switch (type) {
